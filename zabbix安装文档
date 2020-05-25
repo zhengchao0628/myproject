@@ -1,1 +1,55 @@
+1、配置zabbix的yum源
 
+rpm -Uvh https://repo.zabbix.com/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-1.el7.noarch.rpm
+yum clean all
+
+2、安装zabbix-server、mysql、zabbix-agent
+
+注意：安装时若没有安装PHP环境，会自动安装PHP相关的包和httpd，因为zabbix的Web管理页面是PHP写的
+
+yum -y install zabbix-server-mysql zabbix-web-mysql zabbix-agent
+
+3、进入MySQL数据库并设置开机启动，创建数据库实例，授权
+
+mysql -u root -p
+password
+mysql> create database zabbix character set utf8 collate utf8_bin;  # 创建一个数据库
+
+mysql> grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';  # 授权zabbix用户拥有zabbix数据库的所有权限
+
+mysql>flush privileges;  # 刷新数据库权限表    
+
+mysql> quit;
+
+4、导入初始模式和数据
+
+zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -u zabbix -p
+
+这一步我遇到了错误：ERROR 1046 (3D000) at line 1: No database selected
+
+解决方法，见另一篇博客：https://www.cnblogs.com/opsprobe/p/10812274.html
+
+5、配置zabbix-server的配置文件zabbix_server.conf
+
+vim /etc/zabbix/zabbix_server.conf
+
+# DBPassword=password（124行）
+
+DBHost=localhost         # 数据主机名
+DBName=zabbix           # 数据库实例
+DBUser=zabbix             # 数据库里创建的用户名
+DBPassword=zabbix     # 数据库里创建的密码
+
+6、编辑Apache的配置文件，设置正确的时区
+
+vim /etc/httpd/conf.d/zabbix.conf
+
+# php_value date.timezone Europe/Riga（20行）
+
+改成 php_value date.timezone Asia/Shanghai
+
+7、重新启动 zabbix-server、zabbix-agent 和 httpd 并设置为开机自启动
+
+systemctl restart zabbix-server zabbix-agent httpd
+
+systemctl enable zabbix-server zabbix-agent httpd
