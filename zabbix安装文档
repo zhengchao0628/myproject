@@ -2,8 +2,8 @@
 环境准备：
 
 yum -y install centos-release-scl.noarch
-方式一：httpd（apache)
-yum -y install rh-php72 rh-php72-php rh-php72-php-fpm httpd
+rpm -ivh mysql-community-libs-compat-5.7.26-1.el7.x86_64.rpm 
+
 
 
 
