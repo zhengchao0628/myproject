@@ -15,7 +15,69 @@ mysql -u root -p
 password
 mysql> create database zabbix character set utf8 collate utf8_bin;  # 创建一个数据库
 
-mysql> grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';  # 授权zabbix用户拥有zabbix数据库的所有权限
+
+
+#mysql> grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';  # 授权zabbix用户拥有zabbix数据库的所有权限
+####直接创建会报错误ERROR 1819 (HY000): Your password does not satisfy the current policy requirements
+#########
+解决办法：
+
+1、查看 mysql 初始的密码策略，
+输入语句 “ SHOW VARIABLES LIKE 'validate_password%'; ” 进行查看，
+如下图：
+
+
+
+
+
+2、首先需要设置密码的验证强度等级，设置 validate_password_policy 的全局参数为 LOW 即可，
+输入设值语句 “ set global validate_password_policy=LOW; ” 进行设值，
+如下图：
+
+
+
+
+
+
+3、当前密码长度为 8 ，如果不介意的话就不用修改了，按照通用的来讲，设置为 6 位的密码，设置 validate_password_length 的全局参数为 6 即可，
+输入设值语句 “ set global validate_password_length=6; ” 进行设值，
+如下图：
+
+
+
+
+
+
+4、现在可以为 mysql 设置简单密码了，只要满足六位的长度即可，
+输入修改语句 “ ALTER USER 'root'@'localhost' IDENTIFIED BY '123456'; ” 可以看到修改成功，表示密码策略修改成功了！！！
+
+如下图：
+
+
+注：在默认密码的长度最小值为 4 ，由 大/小写字母各一个 + 阿拉伯数字一个 + 特殊字符一个，
+只要设置密码的长度小于 3 ，都将自动设值为 4 ，如下图：
+
+
+关于 mysql 密码策略相关参数；
+1）、validate_password_length  固定密码的总长度；
+2）、validate_password_dictionary_file 指定密码验证的文件路径；
+3）、validate_password_mixed_case_count  整个密码中至少要包含大/小写字母的总个数；
+4）、validate_password_number_count  整个密码中至少要包含阿拉伯数字的个数；
+5）、validate_password_policy 指定密码的强度验证等级，默认为 MEDIUM；
+关于 validate_password_policy 的取值：
+0/LOW：只验证长度；
+1/MEDIUM：验证长度、数字、大小写、特殊字符；
+2/STRONG：验证长度、数字、大小写、特殊字符、字典文件；
+6）、validate_password_special_char_count 整个密码中至少要包含特殊字符的个数；
+————————————————
+版权声明：本文为CSDN博主「csdn-华仔」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/hello_world_qwp/java/article/details/79551789
+###############=======================================================#######################################################
+#先创建一个用户
+create user 'zabbix'@'localhost' identified by 'zabbix';
+#再进行授权
+grant all privileges on zabbix.* to 'zabbix'@'localhost' with grant option;
+
 
 mysql>flush privileges;  # 刷新数据库权限表    
 
@@ -28,6 +90,37 @@ zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -u zabbix -p
 这一步我遇到了错误：ERROR 1046 (3D000) at line 1: No database selected
 
 解决方法，见另一篇博客：https://www.cnblogs.com/opsprobe/p/10812274.html
+使用如下命令导入Zabbix数据库时报错
+
+
+
+解决办法：
+编辑要导入的数据库文件
+vim /usr/share/doc/zabbix-server-mysql-4.0.7/create.sql.gz
+
+# 在第一行加上
+
+use zabbix;
+
+如下图所示：
+
+
+
+保存退出！
+
+然后重新导入MySQL数据库即可。注意：导入过程可能会持续几秒。
+
+zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -u zabbix -p
+
+
+
+
+
+
+
+
+
+
 
 5、配置zabbix-server的配置文件zabbix_server.conf
 
