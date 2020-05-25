@@ -1,3 +1,21 @@
+第一步骤： 环境准备
+环境准备：
+
+yum -y install centos-release-scl.noarch
+方式一：httpd（apache)
+yum -y install rh-php72 rh-php72-php rh-php72-php-fpm httpd
+
+
+
+
+
+
+
+
+
+
+
+
 
 CentOS 7安装PHP 7.x，两种选项httpd(apache)和nginx。
 
@@ -6,6 +24,7 @@ CentOS 7安装PHP 7.x，两种选项httpd(apache)和nginx。
 yum -y install centos-release-scl.noarch
 方式一：httpd（apache)
 yum -y install rh-php72 rh-php72-php rh-php72-php-fpm httpd
+
 说明：使用php-fpm代替mod_php，fpm默认运行在900端口。
 
 修改fpm端口方法
