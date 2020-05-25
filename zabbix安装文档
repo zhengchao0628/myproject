@@ -1,5 +1,55 @@
-1、配置zabbix的yum源
 
+CentOS 7安装PHP 7.x，两种选项httpd(apache)和nginx。
+
+环境准备：
+
+yum -y install centos-release-scl.noarch
+方式一：httpd（apache)
+yum -y install rh-php72 rh-php72-php rh-php72-php-fpm httpd
+说明：使用php-fpm代替mod_php，fpm默认运行在900端口。
+
+修改fpm端口方法
+/etc/opt/rh/rh-php72/php-fpm.d/www.conf
+
+listen = 127.0.0.1:9000
+然后运行：
+
+semanage port -a -t http_port_t -p tcp 9000
+配置httpd
+在/etc/httpd/conf.d/目录下创建新文件：
+
+fpm.conf
+
+# PHP scripts setup ProxyPassMatch ^/(.*.php)$ fcgi://127.0.0.1:9000/var/www/html
+
+Alias / /var/www/html/
+
+DirectoryIndex index.php
+说明：apache将把所有以.php的文件传送给php-fpm服务。
+
+验证
+创建php文件：
+
+vi /var/www/html/index.php 
+内容：
+
+<?php phpinfo() ?>
+将新端口加入防火墙白名单。
+
+
+
+
+
+
+
+
+
+
+
+
+
+1、配置zabbix的yum源
+yum install mysql-dev gcc net-snmp-devel curl-devel perl-DBI php-gd php-mysql php-bcmath php-mbstring php-xm
 rpm -Uvh https://repo.zabbix.com/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-1.el7.noarch.rpm
 yum clean all
 
